@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.TestCode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.HardwareProfile.HardwareProfile;
 import org.firstinspires.ftc.teamcode.Threads.MechControlLibrary;
@@ -57,9 +58,13 @@ public class ArmTesting extends LinearOpMode {
         robot.intakeDeployPink.setPosition(robot.PINK_ZERO);
         robot.intakeTilt.setPosition(robot.INTAKE_STARTING_POS);
         telemetry.update();
+        ElapsedTime runtime = new ElapsedTime();
+        double currentTime = 0;
+
 
         waitForStart();
         armController.start();
+        currentTime = runtime.time();
 
         while(opModeIsActive()) {
             if(!gamepad1.a){
@@ -71,7 +76,7 @@ public class ArmTesting extends LinearOpMode {
                 intakeDown=!intakeDown;
             }
             if(intakeDown){
-                armControl.intakeOn(isDeployed);
+                armControl.intakeOn(isDeployed, currentTime);
             }else if(gamepad1.b){
                 robot.motorIntake.setPower(robot.INTAKE_REVERSE_POW);
             }else{

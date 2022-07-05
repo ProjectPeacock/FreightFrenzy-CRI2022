@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.HardwareProfile.HardwareProfile;
 import org.firstinspires.ftc.teamcode.Threads.MechControlLibrary;
@@ -50,11 +51,17 @@ public class TeleOpThreads extends LinearOpMode {
         boolean chainsawReady=false;
         double turn, drive, left, right, max;
 
+        ElapsedTime runtime = new ElapsedTime();
+        double currentTime = 0;
+
+
         waitForStart();
         robot.intakeDeployBlue.setPosition(robot.BLUE_ZERO);
         robot.intakeDeployPink.setPosition(robot.PINK_ZERO);
         robot.intakeTilt.setPosition(robot.INTAKE_STARTING_POS);
         armController.start();
+
+        currentTime = runtime.time();
 
         while(opModeIsActive()) {
             /*
@@ -115,11 +122,12 @@ public class TeleOpThreads extends LinearOpMode {
             if(gamepad1.a&&toggleIntake&&!isDeployed){
                 toggleIntake=false;
                 intakeDown=!intakeDown;
+                currentTime = runtime.time();
             }
             //check if intake needs to be reversed and then deploy or retract
             if(!gamepad1.b) {
                 if (intakeDown) {
-                    mechControl.intakeOn(isDeployed);
+                    mechControl.intakeOn(isDeployed, currentTime);
                 } else {
                     mechControl.intakeOff(isDeployed,false);
                 }

@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareProfile.HardwareProfile;
 import org.firstinspires.ftc.teamcode.Threads.MechControlLibrary;
 //import org.firstinspires.ftc.teamcode.Threads.TurretControlLibrary;
@@ -67,6 +69,9 @@ public class TeleOpAnthonyControls extends LinearOpMode {
         double turn, drive, left, right, max;
         int turretPosition=0;
         int turretThreshold=2;
+        ElapsedTime runtime = new ElapsedTime();
+        double currentTime = 0;
+
 
         waitForStart();
         robot.intakeDeployBlue.setPosition(robot.BLUE_ZERO);
@@ -128,12 +133,19 @@ public class TeleOpAnthonyControls extends LinearOpMode {
                 toggleIntake=true;
             }
 
-
             //if intake isn't deployed, deploy it & vice versa
 
             if(gamepad1.right_bumper&&toggleIntake){
                 toggleIntake=false;
                 intakeDown=!intakeDown;
+                currentTime = runtime.time();
+                isDeployed=false;
+                bumpCount=0;
+            }
+
+            //automatically retract intake
+            if(intakeDown&&robot.bucketSensor.getDistance(DistanceUnit.MM) < 120&&robot.motorArmAngle1.getCurrentPosition()>900){
+                intakeDown=false;
                 isDeployed=false;
                 bumpCount=0;
             }
@@ -141,7 +153,7 @@ public class TeleOpAnthonyControls extends LinearOpMode {
             if (!gamepad1.left_bumper) {
                 if (intakeDown) {
                     if(Math.abs(robot.turrentEncoder.getCurrentPosition())<=5) {
-                        mechControl.intakeOn(isDeployed);
+                        mechControl.intakeOn(isDeployed,currentTime);
                     }
                 } else {
                     mechControl.intakeOff(isDeployed,TSEMode);
@@ -297,8 +309,13 @@ public class TeleOpAnthonyControls extends LinearOpMode {
                     } else if (bumpCount == 2) {
                         bucketAngle = 0.55;
                     } else if (bumpCount == 3) {
-                        if(robot.motorArmAngle1.getCurrentPosition()<-1000) {
+                        telemetry.addData("bump count = ", bumpCount);
+                        if(robot.motorArmAngle1.getCurrentPosition()<-900) {
                             bucketAngle = 0.75;
+                        }else if(robot.motorArmAngle1.getCurrentPosition()<-650) {
+                            bucketAngle = 0.65;
+                        }else if(robot.motorArmAngle1.getCurrentPosition()<-500) {
+                            bucketAngle = 0.55;
                         }
                     } else if (robot.motorArmAngle1.getCurrentPosition() < 500) {
                             bucketAngle = 0.5;
@@ -359,7 +376,9 @@ public class TeleOpAnthonyControls extends LinearOpMode {
 
             telemetry.addData("TSE MODE: ",TSEMode);
             telemetry.addData("","");
-            telemetry.addData("Last Intake Servo Pos",robot.bucketDump.getPosition());
+            telemetry.addData("Bucket Dump Servo Pos",robot.bucketDump.getPosition());
+            telemetry.addData("Extra bump count line item = ", bumpCount);
+            telemetry.addData("Arm Angle 1 = ", robot.motorArmAngle1.getCurrentPosition());
             telemetry.addData("Turret Current Angle: ",robot.turrentEncoder.getCurrentPosition());
             telemetry.addData("Turret Target Angle: ",turretPosition);
             telemetry.addData("Turret Preset: ",turretPreset);

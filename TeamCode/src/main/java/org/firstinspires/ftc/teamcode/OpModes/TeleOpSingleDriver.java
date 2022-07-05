@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareProfile.HardwareProfile;
 import org.firstinspires.ftc.teamcode.Threads.MechControlLibrary;
 //import org.firstinspires.ftc.teamcode.Threads.TurretControlLibrary;
@@ -54,6 +56,9 @@ public class TeleOpSingleDriver extends LinearOpMode {
         boolean TSEMode=false;
         boolean TSEtoggle=false;
 
+        ElapsedTime runtime = new ElapsedTime();
+        double currentTime = 0;
+
         double chainsawPower=1;
         boolean chainsawToggle=false;
 
@@ -65,6 +70,7 @@ public class TeleOpSingleDriver extends LinearOpMode {
         robot.intakeTilt.setPosition(robot.INTAKE_STARTING_POS);
         mechController.start();
         turretController.start();
+        currentTime = runtime.time();
 
         while(opModeIsActive()) {
             /*
@@ -131,12 +137,19 @@ public class TeleOpSingleDriver extends LinearOpMode {
                 intakeDown=!intakeDown;
                 isDeployed=false;
                 bumpCount=0;
+                currentTime = runtime.time();
+            }
+            //automatically retract intake
+            if(intakeDown&&robot.bucketSensor.getDistance(DistanceUnit.MM) < 120&&robot.motorArmAngle1.getCurrentPosition()>900){
+                intakeDown=false;
+                isDeployed=false;
+                bumpCount=0;
             }
             //check if intake needs to be reversed and then deploy or retract
             if(!gamepad1.b) {
                 if (intakeDown) {
                     if(Math.abs(robot.turrentEncoder.getCurrentPosition())<=5) {
-                        mechControl.intakeOn(isDeployed);
+                        mechControl.intakeOn(isDeployed, currentTime);
                     }
                 } else {
                     mechControl.intakeOff(isDeployed, TSEMode);

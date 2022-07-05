@@ -36,7 +36,6 @@ package org.firstinspires.ftc.teamcode.OpModes;
 //
 // import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -88,7 +87,7 @@ public class CRIFullAuto extends LinearOpMode {
     private HardwareProfile robot   = new HardwareProfile();
     private LinearOpMode opMode = this;
     private State setupState = State.ALLIANCE_SELECT;     // default setupState configuration
-    private State runState = State.SET_DISTANCES;
+    private State runState = State.INIT_PARAMS;
     private DriveClass drive = new DriveClass(robot, opMode);
     boolean debugMode = false;
 
@@ -112,10 +111,11 @@ public class CRIFullAuto extends LinearOpMode {
 
         boolean autoReady = false;
         boolean running = true;
+        boolean scoreDuck = true;
         double startTime;
         String goalPosition = "";
         long startDelay = 0;
-        double timeElapsed;
+        double currentTime;
 
         // set default values
         int scoreLevel = 1;
@@ -187,7 +187,7 @@ public class CRIFullAuto extends LinearOpMode {
         // reset the sweeper bar to stored position
         drive.resetTSEBar();
 
-        timeElapsed = runtime.time();   // initialize timeElapsed to confirm button press time
+        currentTime = runtime.time();   // initialize currentTime to confirm button press time
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Status", "Ready to run");    //
@@ -244,18 +244,18 @@ public class CRIFullAuto extends LinearOpMode {
                         logData();
                     }
 
-                    if(gamepad1.dpad_up && (runtime.time()-timeElapsed) >0.3) {
+                    if(gamepad1.dpad_up && (runtime.time()-currentTime) >0.3) {
                         if(startDelay < 10){       // limit the max delay to 10 seconds
                             startDelay = startDelay + 1;
                         }
-                        timeElapsed = runtime.time();
+                        currentTime = runtime.time();
                     } //end of if(gamepad1.dpad_up ...
 
-                    if(gamepad1.dpad_down && (runtime.time()-timeElapsed) >0.3) {
+                    if(gamepad1.dpad_down && (runtime.time()-currentTime) >0.3) {
                         if(startDelay > 0){       // confirm that the delay is not negative
                             startDelay = startDelay - 1;
                         } else startDelay = 0;
-                        timeElapsed = runtime.time();
+                        currentTime = runtime.time();
                     } //end of if(gamepad1.dpad_down...
 
                     if(gamepad1.a){         // exit the setup
@@ -292,24 +292,31 @@ public class CRIFullAuto extends LinearOpMode {
                         logData();
                     }
 
-                    if(gamepad1.dpad_up && (runtime.time()-timeElapsed) >0.3) {
+                    if(gamepad1.dpad_up && (runtime.time()-currentTime) >0.3) {
                         if(fieldPosition < 4){       // limit the max delay to 10 seconds
                             fieldPosition = fieldPosition + 1;
                         } else fieldPosition =1;
-                        timeElapsed = runtime.time();
+                        currentTime = runtime.time();
                     } //end of if(gamepad1.dpad_up ...
 
-                    if(gamepad1.dpad_down && (runtime.time()-timeElapsed) >0.3) {
+                    if(gamepad1.dpad_down && (runtime.time()-currentTime) >0.3) {
                         if(fieldPosition > 2){       // confirm that the delay is not negative
                             fieldPosition = fieldPosition - 1;
                         } else fieldPosition = 3;
-                        timeElapsed = runtime.time();
+                        currentTime = runtime.time();
                     } //end of if(gamepad1.dpad_down...
 
-                    if(gamepad1.a){         // exit the setup
-                        setupState = State.FIELD_POSITION_SELECT;
-                        startDelay = startDelay * 1000;
-                        telemetry.addData("# of Seconds Delay == ", startDelay);
+                    if(gamepad1.a && (runtime.time()-currentTime > 0.3)){         // exit the setup
+                        if(fieldPosition == 1) {
+                            telemetry.addData("Position to Select = ", "Warehouse Side");
+                            setupState = State.SELECT_PARK;
+                        } else if(fieldPosition ==2){
+                            telemetry.addData("Position to Select = ", "Middle of the field");
+                            setupState = State.SELECT_PARK;
+                        } else {
+                            telemetry.addData("Position to Select = ", "Carousel Side");
+                            setupState = State.SELECT_CAR_OPTIONS;
+                        }
                         telemetry.update();
                         sleep(2000);
                     }   // end of if(gamepad1.a...
@@ -319,6 +326,32 @@ public class CRIFullAuto extends LinearOpMode {
                         autoReady = true;
                     }
 
+                    break;
+
+                case SELECT_CAR_OPTIONS:
+                    telemetry.addData("Score Ducks?", "");
+                    telemetry.addData("Press DPAD_LEFT == ", " YES");
+                    telemetry.addData("Press DPAD_RIGHT == ", " NO");
+                    telemetry.addData("Press X to abort program ","");
+                    telemetry.update();
+
+                    if(gamepad1.dpad_left || gamepad1.dpad_right){
+                        scoreDuck = gamepad1.dpad_left;
+
+                        if(scoreDuck) {
+                            telemetry.addData("Score duck in Auto == ", "YES");
+                        } else {
+                            telemetry.addData("Score duck in Auto == ", "NO");
+                        }
+                        setupState = State.SELECT_PARK;
+                        telemetry.update();
+                        sleep(2000);
+                    }   // end of if(gamepad1.a...
+
+                    if(gamepad1.x){
+                        running = false;
+                        autoReady = true;
+                    }
                     break;
 
                 case SELECT_BONUS:
@@ -350,14 +383,14 @@ public class CRIFullAuto extends LinearOpMode {
                 case SELECT_PARK:
                     if(fieldPosition == 3) {
                         telemetry.addData("Where to park?", "");
-                        telemetry.addData("Press DPAD Up  == ", " Park in Warehouse");
-                        telemetry.addData("Press DPAD Down == ", " Park in Storage");
+                        telemetry.addData("Press A  == ", " Park in Warehouse");
+                        telemetry.addData("Press B == ", " Park in Storage");
                         telemetry.addData("Press X to abort program ", "");
                         telemetry.update();
 
-                        if (gamepad1.dpad_up || gamepad1.dpad_down) {
+                        if (gamepad1.a || gamepad1.b) {
                             //sleep(1000);
-                            warehousePark = gamepad1.dpad_up;
+                            warehousePark = gamepad1.a;
                             if (warehousePark) {
                                 telemetry.addData("Park Location == ", "WAREHOUSE");
                             } else {
@@ -395,6 +428,13 @@ public class CRIFullAuto extends LinearOpMode {
                     } else {
                         telemetry.addData("Position to Select = ", "Carousel Side");
                     }
+
+                    if(scoreDuck) {
+                        telemetry.addData("Score duck in Auto == ", "YES");
+                    } else {
+                        telemetry.addData("Score duck in Auto == ", "NO");
+                    }
+
                     if(warehousePark) {
                         telemetry.addData("Park Location == ", "WAREHOUSE");
                     } else {
@@ -507,7 +547,9 @@ public class CRIFullAuto extends LinearOpMode {
             if(gamepad1.x || gamepad2.x) running = false;   // abort the program
         }   // end of while(!opModeIsActive...
 
-        if(!running) requestOpModeStop();   // user requested to abort setup
+        if(!running) {
+            requestOpModeStop();   // user requested to abort setup
+        }
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -516,7 +558,7 @@ public class CRIFullAuto extends LinearOpMode {
         turretController.start();
 
         if(debugMode){
-            runState = State.SET_DISTANCES;
+            runState = State.INIT_PARAMS;
 
             action = "Initialized Settings";
             logData();      // Write data to the data logger
@@ -529,8 +571,6 @@ public class CRIFullAuto extends LinearOpMode {
 
         runtime.reset();
 
-
-
         while (opModeIsActive() && (running)) {
             robot.motorArmAngle1.setTargetPosition(0);
             robot.motorArmAngle2.setTargetPosition(0);
@@ -539,7 +579,7 @@ public class CRIFullAuto extends LinearOpMode {
                     drive.driveTurn(-90, 2);
                     runState = State.HALT;
                     break;
-                case SET_DISTANCES:
+                case INIT_PARAMS:
                     // Setup parameters per settings
                     params.initParams(blueAlliance, fieldPosition);
 
@@ -573,11 +613,11 @@ public class CRIFullAuto extends LinearOpMode {
                     sleep(startDelay);
                     robot.motorChainsaw.setPower(0);
 
-                    // move the TSE out of the way
-                    runState = State.MOVE_TSE_STRAIGHT; // default to STRAIGHT
-
                     // If the TSE is straight in front of the robot, go straight, otherwise, arc
                     if(fieldPosition == 1) {
+                        // move the TSE out of the way
+                        runState = State.MOVE_TSE_STRAIGHT; // default to STRAIGHT
+
                         if (!blueAlliance && scoreLevel == 1){  // red alliance, level 1
                             runState = State.MOVE_TSE_ARC; // default to STRAIGHT
                         }
@@ -586,7 +626,9 @@ public class CRIFullAuto extends LinearOpMode {
                         }
                     } else if (fieldPosition == 2) {
                         runState = State.MIDDLE_SCORING;
-                    }// end of if(fieldPosition == 3)
+                    } else {
+                        runState = State.CAROUSEL_SCORING;
+                    } // end of if(fieldPosition == 3)
 
                     // deploy sweeper bar
                     drive.deployTSEBar();
@@ -604,7 +646,7 @@ public class CRIFullAuto extends LinearOpMode {
                     drive.driveStraight(params.forwardSpeed, params.tseReturnDist);
                     sleep(250);
 
-                    runState = State.X_SCORE;       // score in the hub
+                    runState = State.WAREHOUSE_SCORE;       // score in the hub
                     break;
 
                 case MOVE_TSE_ARC:
@@ -630,12 +672,177 @@ public class CRIFullAuto extends LinearOpMode {
 
                     */
 
-                    runState = State.X_SCORE;       // score in the hub
+                    runState = State.WAREHOUSE_SCORE;       // score in the hub
                     break;
 
                 /*********************************************************************
                  * *******************************************************************
                  * ******* B E G I N N I N G    O F     C A R O U S E L **************
+                 * *******************************************************************
+                 ********************************************************************/
+
+                case CAROUSEL_SCORING:
+                    // drive forward to push the TSE out of the way
+                    drive.driveStraight(-0.5, 30);
+
+                    // turn towards alliance shipping hub
+                    drive.driveTurn(params.hubFactor * 90, params.turnError);
+
+                    // drive forward towards the obstacle
+                    drive.driveStraight(-0.5, 15);
+
+                    // store sweeper bar
+                    drive.resetTSEBar();
+
+                    // drive towards the barricade and prepare to go over it
+                    drive.setDrivePower(-0.20, -0.20, -0.20, -0.20);
+                    sleep(1000);
+                    drive.setDrivePower(0,0,0,0);
+
+                    // drive over the rough terrain
+                    drive.driveStraight(-1,20);
+                    drive.motorsHalt();
+
+                    // correct the orientation of the robot
+                    drive.driveTurn(params.hubFactor * 90, params.turnError);
+
+                    // drive back towards the bar to reset position
+                    drive.setDrivePower(0.25, 0.25, 0.25, 0.25);
+                    sleep(1000);
+                    drive.setDrivePower(0,0,0,0);
+
+                    //position the arm to place the shipping element in the correct level
+                    if(scoreLevel == 1) {
+                        mechControl.scoringPos1();
+                        sleep(750);
+                    } else if(scoreLevel == 2) {
+
+                        mechControl.scoringPos2();
+                        sleep(750);
+                    } else {
+                        mechControl.scoringPos3();
+                        sleep(750);
+                    }
+
+                    drive.bucketDump();
+                    sleep(350);
+
+                    // back away from the hub
+//                    drive.driveStraight(0.6, 5);
+
+                    // wait until the bot has backed away from the hub to return the arm to position
+                    mechControl.moveToZero();
+
+                    // drive back over the barrier & realign position
+                    drive.driveStraight(1, 20);
+                    drive.driveTurn(params.hubFactor * 90, params.turnError);
+
+                    // check to see if the robot should just park or if the robot should score the duck
+                    if(scoreDuck){
+                        runState = State.CAROUSEL_DUCK;
+                    } else {
+                        runState = State.CAROUSEL_STORAGE_PARK;
+                    }
+
+//                    runState = State.HALT;
+
+                    break;
+
+
+                case CAROUSEL_DUCK:
+                    // realign the robot
+                    drive.driveTurn(params.hubFactor * 90, params.turnError);
+
+                    // get closer to the outside wall
+                    drive.driveStraight(0.5, 20);
+
+                    // set elapsedtime to current time
+                    currentTime = runtime.time();
+                    // drive towards the outside wall using distance sensor
+                    while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 30) && opModeIsActive()&&((runtime.time()-currentTime)<1.00))) {
+                        if (((runtime.time()-currentTime)>1.5)){
+                            break;
+                        }
+                        drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
+                                params.forwardSpeed, params.forwardSpeed);
+                        robot.motorChainsaw.setPower(robot.CHAIN_POW*0.75);
+
+                        telemetry.addData("Headed towards ","outside wall");
+                        telemetry.addData("distance to wall = ", robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM));
+                        //   telemetry.addData("elapsed time = ", runtime.time()-currentTime);
+                        telemetry.update();
+                    }   // end of while(robot.frontDistanceSensor
+
+                    drive.motorsHalt();
+                    telemetry.addData("Reached","Wall");
+                    telemetry.update();
+                    //go to carousel, red
+                    //turn to face carousel
+                    drive.driveTurn(0, params.turnError);
+                    sleep(350);
+                    drive.driveTurn(0, params.turnError);       // double check angle towards carousel
+
+                    // set elapsedtime to current time
+                    currentTime = runtime.time();
+                    //drive forward until distance sensor is tripped
+                    // drive towards the carousel
+                    while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 30)&&opModeIsActive()&&((runtime.time()-currentTime)<1.25))) {
+                        drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
+                                params.forwardSpeed, params.forwardSpeed);
+                        robot.motorChainsaw.setPower(-robot.CHAIN_POW * 0.75);
+                    }   // end while(robot.frontDistance...
+
+                    //drive forward at very low power to keep in contact with carousel
+                    drive.setDrivePower(0.1,0.1,0.1,0.1);
+
+                    //sleep to wait for carousel to drop duck to the floor
+                    sleep(4000);
+
+                    //reposition to face carousel again
+                    drive.driveTurn(0,params.turnError);
+
+                    // drive away from the carousel
+                    drive.driveStraight(params.reverseSpeed, 2);
+
+                    //turn off chainsaw
+                    robot.motorChainsaw.setPower(0);
+
+                    if(!warehousePark) {
+                        runState = State.CAROUSEL_STORAGE_PARK;
+                    }else {
+                        runState = State.WAREHOUSE_PARK;
+                    }
+
+                    // turn towards the
+                    break;
+
+                case CAROUSEL_STORAGE_PARK:
+                    if(debugMode) {
+                        telemetry.addData("Working on X_Score = ", "Now");
+                        telemetry.update();
+//                        sleep(5000);
+                    }
+
+                    if(scoreDuck) {
+                        drive.driveStraight(params.reverseSpeed, 1);
+                        drive.driveTurn((-15 * params.hubFactor), params.turnError);
+                        drive.driveStraight(params.reverseSpeed, 12);
+
+                        drive.driveTurn(0, params.turnError);
+                    } else {
+                        // drive towards the carousel
+                        while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 30)&&opModeIsActive()&&((runtime.time()-currentTime)<1.25))) {
+                            drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
+                                    params.forwardSpeed, params.forwardSpeed);
+                            robot.motorChainsaw.setPower(-robot.CHAIN_POW * 0.75);
+                        }
+                    }
+                    runState = State.HALT;
+                    break;
+
+                /*********************************************************************
+                 * *******************************************************************
+                 * ************ E N D     O F       C A R O U S E L ******************
                  * *******************************************************************
                  ********************************************************************/
 
@@ -652,12 +859,10 @@ public class CRIFullAuto extends LinearOpMode {
                     drive.driveStraight(-0.4, 5);
 
                     // rotate towards the Alliance Hub
-                    drive.driveTurn(params.turnHubAngle, params.turnError);
+                    drive.driveTurn(params.midTurnHubAngle, params.turnError);
 
                     // drive forward towards the alliance shipping hub
                     drive.driveStraight(-0.4, 5);
-
-//                    scoreLevel = 2;
 
                     //position the arm to place the shipping element in the correct level
                     if(scoreLevel == 1) {
@@ -733,6 +938,7 @@ public class CRIFullAuto extends LinearOpMode {
 
                     if(!warehousePark){
                         // go to MIDDLE_STORAGE_PARK
+                        runState = State.MIDDLE_STORAGE_PARK;
                     } else {
                         // go to MIDDLE_WAREHOUSE_PARK
                         runState = State.MIDDLE_WAREHOUSE_PARK;
@@ -789,8 +995,8 @@ public class CRIFullAuto extends LinearOpMode {
                     // drive closer to the outside wall
                     drive.driveStraight(0.3, 5);
 
-                    // rotate towards the carousel
-                    drive.driveTurn(0, params.turnError);
+                    // rotate away from the carousel
+                    drive.driveTurn(params.hubFactor * 170, params.turnError);
 
                     // wait until there is only a couple of seconds before driving into the storage
                     while(((runtime.time()) < params.warehouseParkDelay) && opModeIsActive()){
@@ -820,7 +1026,7 @@ public class CRIFullAuto extends LinearOpMode {
 
 
 
-                case X_SCORE:
+                case WAREHOUSE_SCORE:
                     turnError = 2;
 
                     if(debugMode) {
@@ -862,26 +1068,11 @@ public class CRIFullAuto extends LinearOpMode {
                     robot.bucketDump.setPosition(0.5);
                     armControl.moveToZero();
 
-
                     // reset the sweeper bar
                     drive.resetTSEBar();
-                    if(blueAlliance && fieldPosition == 3){        // blue_Carousel
-                        runState = State.BLUE_CAROUSEL;
-                    } else if(blueAlliance && fieldPosition == 1){  // blue warehouse
-                        if(bonusElements) {
-                            runState = State.BLUE_WAREHOUSE_BONUS;
-                        } else {
-                            runState = State.WAREHOUSE_PARK;
-                        }
-                    } else if(!blueAlliance && fieldPosition == 3){  // red carousel
-                        runState = State.RED_CAROUSEL;
-                    } else {
-                        if(bonusElements) {             // red_warehouse
-                            runState = State.RED_WAREHOUSE_BONUS;
-                        } else {
-                            runState = State.WAREHOUSE_PARK;
-                        }
-                    }   // end if(blueAlliance && fieldPosition == 3)
+
+                    // go park
+                    runState = State.WAREHOUSE_PARK;
                     break;
 
                 case RED_CAROUSEL:
@@ -895,10 +1086,10 @@ public class CRIFullAuto extends LinearOpMode {
                     sleep(350);
 
                     // set elapsedtime to current time
-                    timeElapsed = runtime.time();
+                    currentTime = runtime.time();
                     // drive towards the outside wall using distance sensor
-                    while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 32) && opModeIsActive()&&((runtime.time()-timeElapsed)<1.00))) {
-                        if (((runtime.time()-timeElapsed)>1.5)){
+                    while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 32) && opModeIsActive()&&((runtime.time()-currentTime)<1.00))) {
+                        if (((runtime.time()-currentTime)>1.5)){
                           break;
                         }
                         drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
@@ -907,7 +1098,7 @@ public class CRIFullAuto extends LinearOpMode {
 
                         telemetry.addData("Headed towards ","outside wall");
                         telemetry.addData("distance to wall = ", robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM));
-                    //   telemetry.addData("elapsed time = ", runtime.time()-timeElapsed);
+                    //   telemetry.addData("elapsed time = ", runtime.time()-currentTime);
                         telemetry.update();
                     }   // end of while(robot.frontDistanceSensor
 
@@ -921,10 +1112,10 @@ public class CRIFullAuto extends LinearOpMode {
                     drive.driveTurn(0, params.turnError);       // double check angle towards carousel
 
                     // set elapsedtime to current time
-                    timeElapsed = runtime.time();
+                    currentTime = runtime.time();
                     //drive forward until distance sensor is tripped
                     // drive towards the carousel
-                    while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 30)&&opModeIsActive()&&((runtime.time()-timeElapsed)<1.25))) {
+                    while(((robot.frontDistanceSensorPink.getDistance(DistanceUnit.CM) > 30)&&opModeIsActive()&&((runtime.time()-currentTime)<1.25))) {
                         drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
                                     params.forwardSpeed, params.forwardSpeed);
                         robot.motorChainsaw.setPower(-robot.CHAIN_POW * 0.75);
@@ -960,7 +1151,7 @@ public class CRIFullAuto extends LinearOpMode {
                     robot.motorChainsaw.setPower(0);
 
                     if(!warehousePark) {
-                        runState = State.STORAGE_PARK;
+                        runState = State.CAROUSEL_STORAGE_PARK;
                     }else {
                         runState = State.WAREHOUSE_PARK;
                     }
@@ -972,10 +1163,10 @@ public class CRIFullAuto extends LinearOpMode {
                     sleep(350);
 
                     // set elapsedtime to current time
-                    timeElapsed = runtime.time();
+                    currentTime = runtime.time();
                     // drive towards the outside wall using distance sensor
-                    while(((robot.frontDistanceSensorBlue.getDistance(DistanceUnit.CM) > 32)&&opModeIsActive()&&((runtime.time()-timeElapsed)<1.0))) {
-                        if (((runtime.time()-timeElapsed)>1.5)){
+                    while(((robot.frontDistanceSensorBlue.getDistance(DistanceUnit.CM) > 32)&&opModeIsActive()&&((runtime.time()-currentTime)<1.0))) {
+                        if (((runtime.time()-currentTime)>1.5)){
                             break;
                         }
                         drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
@@ -1002,8 +1193,8 @@ public class CRIFullAuto extends LinearOpMode {
                     drive.driveTurn(0, params.turnError);
 
                     // set elapsedtime to current time
-                    timeElapsed = runtime.time();
-                    while(((robot.frontDistanceSensorBlue.getDistance(DistanceUnit.CM)>30)&&opModeIsActive()&&((runtime.time()-timeElapsed)<1.25))) {
+                    currentTime = runtime.time();
+                    while(((robot.frontDistanceSensorBlue.getDistance(DistanceUnit.CM)>30)&&opModeIsActive()&&((runtime.time()-currentTime)<1.25))) {
                         drive.setDrivePower(params.forwardSpeed, params.forwardSpeed,
                                     params.forwardSpeed, params.forwardSpeed);
                         robot.motorChainsaw.setPower(robot.CHAIN_POW*0.75);
@@ -1034,25 +1225,11 @@ public class CRIFullAuto extends LinearOpMode {
                  //   drive.driveStraight(params.reverseSpeed, 1);
 
                     if(!warehousePark) {
-                        runState = State.STORAGE_PARK;
+                        runState = State.CAROUSEL_STORAGE_PARK;
                     }else {
                         runState = State.WAREHOUSE_PARK;
                     }
 
-                    break;
-
-                case STORAGE_PARK:
-                    if(debugMode) {
-                        telemetry.addData("Working on X_Score = ", "Now");
-                        telemetry.update();
-//                        sleep(5000);
-                    }
-                    drive.driveStraight(params.reverseSpeed, 1);
-                    drive.driveTurn((-15 * params.hubFactor), params.turnError);
-                    drive.driveStraight(params.reverseSpeed,12);
-
-                    drive.driveTurn(0, params.turnError);
-                    runState = State.HALT;
                     break;
 
                 case WAREHOUSE_PARK:
@@ -1108,7 +1285,8 @@ public class CRIFullAuto extends LinearOpMode {
         if(debugMode){
             dlStop();               // stop the data logger
         }
-    //    turretControl.stop();
+        turretControl.stop();
+        mechControl.stop();
         requestOpModeStop();
 
         telemetry.addData("Path", "Complete");
@@ -1120,12 +1298,12 @@ public class CRIFullAuto extends LinearOpMode {
      * Enumerate the states of the machine
      */
     enum State {
-        TEST, ALLIANCE_SELECT, DELAY_LENGTH, FIELD_POSITION_SELECT, SELECT_BONUS, VERIFY_CONFIG, TEST_CONFIG,
-        SLEEP_DELAY, LEVEL_ADJUST, MOVE_TSE_STRAIGHT, MOVE_TSE_ARC, X_SCORE, RED_CAROUSEL, BLUE_CAROUSEL, BONUS_SCORES,
-        BLUE_WAREHOUSE_BONUS, RED_WAREHOUSE_BONUS, STORAGE_PARK, WAREHOUSE_PARK, HALT, SELECT_PARK,
-        SET_DISTANCES,
+        TEST, ALLIANCE_SELECT, DELAY_LENGTH, FIELD_POSITION_SELECT, SELECT_BONUS, SELECT_CAR_OPTIONS, VERIFY_CONFIG, TEST_CONFIG,
+        SLEEP_DELAY, LEVEL_ADJUST, MOVE_TSE_STRAIGHT, MOVE_TSE_ARC, WAREHOUSE_SCORE, RED_CAROUSEL, BLUE_CAROUSEL, BONUS_SCORES,
+        BLUE_WAREHOUSE_BONUS, RED_WAREHOUSE_BONUS,  WAREHOUSE_PARK, HALT, SELECT_PARK,
+        INIT_PARAMS,
         MIDDLE_SCORING, MIDDLE_DUCK, MIDDLE_STORAGE_PARK, MIDDLE_WAREHOUSE_PARK,
-        CAROUSEL_SCORING, CAROUSEL_STORAGE_PARK, CAROUSEL_DUCK
+        CAROUSEL_SCORING, CAROUSEL_DUCK, CAROUSEL_STORAGE_PARK
     }   // end of enum State
 
     /**

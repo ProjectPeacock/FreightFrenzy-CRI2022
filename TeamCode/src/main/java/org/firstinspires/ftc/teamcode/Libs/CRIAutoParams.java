@@ -29,10 +29,11 @@ public class CRIAutoParams {
     public double arcTime =0;
     public double bonusDistance = 0;
 
-    public double turnHubAngle = 0;
-    public double carouselApproachAngle1 = 0;
-    public double carouselApproachAngle2 = 0;
-    public double storageParkTurn = 0;
+    public double midTurnHubAngle = 0;
+    public double midCarouselApproachAngle1 = 0;
+    public double midCarouselApproachAngle2 = 0;
+    public double midStorageParkTurn = 0;
+    public double carTurnHubAngle = 0;
 
     public CRIAutoParams(){
 
@@ -108,10 +109,11 @@ public class CRIAutoParams {
 
         this.forwardDistance = 30.0;    //  if using the arcTurn to move a TSE out of the way,
 
-        this.turnHubAngle = -35;        // angle to turn from start to approach the alliance hub
-        this.carouselApproachAngle1 = 96; // angle after first crossing barrier to approach carousel
-        this.carouselApproachAngle2 = 25; // last angle to turn to approach carousel
-        this.storageParkTurn = 160;       // turn towards the storage for final approach
+        this.midTurnHubAngle = 35;        // angle to turn from start to approach the alliance hub
+        this.midCarouselApproachAngle1 = 96; // angle after first crossing barrier to approach carousel
+        this.midCarouselApproachAngle2 = 25; // last angle to turn to approach carousel
+        this.midStorageParkTurn = 160;       // turn towards the storage for final approach
+        this.carTurnHubAngle = 30;
         // use forward distance to position to score in the hub
     }   // end method redMiddle
 
@@ -160,7 +162,7 @@ public class CRIAutoParams {
         this.bucketAngle1 = -0.75;        // angle of the bucket if placing in level 1
         this.bucketAngle2 = -0.55;        // angle of the bucket if placing in level 1
         this.bucketAngle3 = -1.0;        // angle of the bucket if placing in level 1
-        this.parkDistance = 35;         // distance to travel to get in storage parking location
+        this.parkDistance = -35;         // distance to travel to get in storage parking location
         this.extraDistance = 0;         // extra distance to back up from the hub after X_SCORE
         this.warehouseParkDistance = 30;   // distance to travel to get in warehouse parking location
         this.turnError = 2;             // error to use when turning
@@ -192,10 +194,10 @@ public class CRIAutoParams {
         this.powerLeft = -0.2;          // power to put on the left side of the robot for arc turn
         this.powerRight = -0.7;         // power to put on the right side of the robot for arc turn
 
-        this.turnHubAngle = 35;         // angle to turn from start to approach the alliance hub
-        this.carouselApproachAngle1 = -96; // angle after first crossing barrier to approach carousel
-        this.carouselApproachAngle2 = -25; // last angle to turn to approach carousel
-        this.storageParkTurn = -160;       // turn towards the storage for final approach
+        this.midTurnHubAngle = 35;         // angle to turn from start to approach the alliance hub
+        this.midCarouselApproachAngle1 = -96; // angle after first crossing barrier to approach carousel
+        this.midCarouselApproachAngle2 = -25; // last angle to turn to approach carousel
+        this.midStorageParkTurn = -160;       // turn towards the storage for final approach
 
     }   // end method blueMiddle
 

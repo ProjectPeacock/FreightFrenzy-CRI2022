@@ -24,7 +24,6 @@ public class MechControlLibrary implements Runnable{
     private int sleepTime;
     private boolean isRunning=true;
 
-
     //constructor
     public MechControlLibrary(HardwareProfile robotIn, int threadSleepDelay){
         this.localRobot=robotIn;
@@ -32,10 +31,13 @@ public class MechControlLibrary implements Runnable{
     }
 
 //deploy intake method
-    public void intakeOn(boolean deployed){
+    public void intakeOn(boolean deployed, double currentTime){
         localRobot.intakeDeployBlue.setPosition(localRobot.BLUE_ZERO - localRobot.INTAKE_DEPLOY_BLUE);
         localRobot.intakeDeployPink.setPosition(localRobot.PINK_ZERO + localRobot.INTAKE_DEPLOY_PINK);
         localRobot.intakeTilt.setPosition(localRobot.INTAKE_TILT_INPUT);
+        while(runtime.time()- currentTime > 0.1){
+
+        }
         if(localRobot.motorArmAngle1.getCurrentPosition()<0) {
             angle1 = 0;
         }
@@ -86,6 +88,11 @@ public class MechControlLibrary implements Runnable{
         }
     }
 //end of retract intake method
+
+
+    public void coopArmExtend(){
+
+    }
 
 //reset intake without moving arm (for retracting intake while scoring)
     public void resetIntake(){
