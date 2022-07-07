@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Libs;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.opMode;
+
 public class CRIAutoParams {
 
     public double forwardSpeed = 0;
@@ -34,25 +36,32 @@ public class CRIAutoParams {
     public double midCarouselApproachAngle2 = 0;
     public double midStorageParkTurn = 0;
     public double carTurnHubAngle = 0;
+    public String paramsName = "undefined";
 
     public CRIAutoParams(){
 
     }
     public void initParams(boolean blueAlliance, int fieldPosition){
 
-        if(blueAlliance){
-            if (fieldPosition == 1) {
+        if (fieldPosition == 1) {
+            if(blueAlliance){
                 blueWarehouse();
-            } if(fieldPosition == 2) {
-              blueMiddle();
             } else {
-                blueCarousel();
-            }
-        } else {
-            if(fieldPosition == 1){
                 redWarehouse();
-            } if(fieldPosition == 2) {
+            }
+        }
+
+        if (fieldPosition == 2) {
+            if(blueAlliance){
+                blueMiddle();
+            } else {
                 redMiddle();
+            }
+        }
+
+        if (fieldPosition == 3) {
+            if(blueAlliance){
+                blueCarousel();
             } else {
                 redCarousel();
             }
@@ -60,6 +69,7 @@ public class CRIAutoParams {
     }   // end AutoParams constructor
 
     private void redWarehouse() {
+        this.paramsName = "redWarehouse";
         this.warehouseParkDelay = 13;   // Time consumed before parking in the warehouse
         this.arcTime = 1.3;               // length of time for the arc turn
         this.powerLeft = -0.2;          // power to put on the left side of the robot for arc turn
@@ -85,6 +95,7 @@ public class CRIAutoParams {
     }   // end method redWarehouse
 
     private void redMiddle(){
+        this.paramsName = "redMiddle";
         this.warehouseParkDelay = 27;   // Time consumed before parking in the warehouse
         this.arcTime = 1.9;               // length of time for the arc turn
         this.powerLeft = -0.8;          // power to put on the left side of the robot for arc turn
@@ -113,11 +124,12 @@ public class CRIAutoParams {
         this.midCarouselApproachAngle1 = 96; // angle after first crossing barrier to approach carousel
         this.midCarouselApproachAngle2 = 25; // last angle to turn to approach carousel
         this.midStorageParkTurn = 160;       // turn towards the storage for final approach
-        this.carTurnHubAngle = 30;
+        this.carTurnHubAngle = 25;
         // use forward distance to position to score in the hub
     }   // end method redMiddle
 
     private void redCarousel(){
+        this.paramsName = "redCarousel";
         this.warehouseParkDelay = 25;   // Time consumed before parking in the warehouse
         this.arcTime = 1.9;               // length of time for the arc turn
         this.powerLeft = -0.8;          // power to put on the left side of the robot for arc turn
@@ -146,6 +158,7 @@ public class CRIAutoParams {
 
 
     private void blueWarehouse() {
+        this.paramsName = "blueWarehouse";
         this.warehouseParkDelay = 13;   // Time consumed before parking in the warehouse
         this.arcTime = 1.6;               // length of time for the arc turn
         this.powerLeft = -0.55;          // power to put on the left side of the robot for arc turn
@@ -171,6 +184,7 @@ public class CRIAutoParams {
     }   // end method blueWarehouse
 
     private void blueMiddle(){
+        this.paramsName = "blueMiddle";
         this.warehouseParkDelay = 25;   // Time consumed before parking in the warehouse
         this.arcTime = 1;               // length of time for the arc turn
         this.arcTurnReturn = 15;
@@ -189,19 +203,21 @@ public class CRIAutoParams {
         this.extraDistance = 5;         // extra distance to back up from the hub after X_SCORE
         this.parkDistance = 35;         // distance to travel to get in storage parking location
         this.warehouseParkDistance = 100;   // distance to travel to get in warehouse parking location
-        this.turnError = 2;             // error to use when turning
+        this.turnError = 3;             // error to use when turning
         this.hubFactor = -1;             // sets direction to rotate depending on where the hub is
         this.powerLeft = -0.2;          // power to put on the left side of the robot for arc turn
         this.powerRight = -0.7;         // power to put on the right side of the robot for arc turn
 
-        this.midTurnHubAngle = 35;         // angle to turn from start to approach the alliance hub
-        this.midCarouselApproachAngle1 = -96; // angle after first crossing barrier to approach carousel
+        this.midTurnHubAngle = -35;         // angle to turn from start to approach the alliance hub
+        this.midCarouselApproachAngle1 = -100; // angle after first crossing barrier to approach carousel
         this.midCarouselApproachAngle2 = -25; // last angle to turn to approach carousel
         this.midStorageParkTurn = -160;       // turn towards the storage for final approach
+        this.carTurnHubAngle = -25;
 
     }   // end method blueMiddle
 
     private void blueCarousel(){
+        this.paramsName = "blueCarousel";
         this.warehouseParkDelay = 25;   // Time consumed before parking in the warehouse
         this.arcTime = 1;               // length of time for the arc turn
         this.arcTurnReturn = 15;

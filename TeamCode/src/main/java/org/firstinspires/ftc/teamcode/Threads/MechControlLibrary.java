@@ -35,7 +35,7 @@ public class MechControlLibrary implements Runnable{
         localRobot.intakeDeployBlue.setPosition(localRobot.BLUE_ZERO - localRobot.INTAKE_DEPLOY_BLUE);
         localRobot.intakeDeployPink.setPosition(localRobot.PINK_ZERO + localRobot.INTAKE_DEPLOY_PINK);
         localRobot.intakeTilt.setPosition(localRobot.INTAKE_TILT_INPUT);
-        while(runtime.time()- currentTime > 0.1){
+        while(runtime.time()- currentTime < 0.1){
 
         }
         if(localRobot.motorArmAngle1.getCurrentPosition()<0) {
