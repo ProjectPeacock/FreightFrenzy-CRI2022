@@ -35,9 +35,9 @@ public class MechControlLibrary implements Runnable{
         localRobot.intakeDeployBlue.setPosition(localRobot.BLUE_ZERO - localRobot.INTAKE_DEPLOY_BLUE);
         localRobot.intakeDeployPink.setPosition(localRobot.PINK_ZERO + localRobot.INTAKE_DEPLOY_PINK);
         localRobot.intakeTilt.setPosition(localRobot.INTAKE_TILT_INPUT);
-        while(runtime.time()- currentTime < 0.1){
-
+        while (runtime.time() - currentTime < 1.15) {
         }
+
         if(localRobot.motorArmAngle1.getCurrentPosition()<0) {
             angle1 = 0;
         }
@@ -68,6 +68,9 @@ public class MechControlLibrary implements Runnable{
 
 //retract intake method
     public void intakeOff(boolean deployed, boolean TSEMode){
+        if(localRobot.motorArmAngle1.getCurrentPosition()>800){
+            localRobot.motorIntake.setPower(-1);
+        }
         if(!deployed){
             angle1=0;
             if(localRobot.motorArmAngle1.getCurrentPosition()<500) {
@@ -127,7 +130,7 @@ public class MechControlLibrary implements Runnable{
         arm1Power=0.75;
         arm2Power=0.75;
         angle1=-1250;
-        angle2=-605;
+        angle2=-755;
     }
 //end of scoring positions methods
 
@@ -232,6 +235,10 @@ public class MechControlLibrary implements Runnable{
     }
 //end of chainsaw acceleration for Red Alliance
 
+//turret encoder centered check
+    public boolean turretCentered(){
+        return Math.abs(localRobot.turrentEncoder.getCurrentPosition())<6;
+    }
 //method that runs whenever thread is running
     public void activeMechControl(){
         localRobot.motorArmAngle1.setPower(arm1Power);

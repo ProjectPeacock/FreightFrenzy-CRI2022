@@ -140,7 +140,7 @@ public class TeleOpSingleDriver extends LinearOpMode {
                 currentTime = runtime.time();
             }
             //automatically retract intake
-            if(intakeDown&&robot.bucketSensor.getDistance(DistanceUnit.MM) < 120&&robot.motorArmAngle1.getCurrentPosition()>900){
+            if(intakeDown&&robot.bucketSensor.getDistance(DistanceUnit.MM) < 120&&robot.motorArmAngle1.getCurrentPosition()>(robot.ARM_1_INTAKE-50)){
                 intakeDown=false;
                 isDeployed=false;
                 bumpCount=0;

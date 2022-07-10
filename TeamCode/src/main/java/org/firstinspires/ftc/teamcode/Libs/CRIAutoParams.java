@@ -36,6 +36,7 @@ public class CRIAutoParams {
     public double midCarouselApproachAngle2 = 0;
     public double midStorageParkTurn = 0;
     public double carTurnHubAngle = 0;
+    public double midCarouselDistance=0;
     public String paramsName = "undefined";
 
     public CRIAutoParams(){
@@ -115,7 +116,7 @@ public class CRIAutoParams {
         this.arcTurnReturn = 20;
         this.extraDistance = 5;         // extra distance to back up from the hub after X_SCORE
         this.warehouseParkDistance = 100;   // distance to travel to get in warehouse parking location
-        this.turnError = 2;             // error to use when turning
+        this.turnError = 3;             // error to use when turning
         this.hubFactor = 1;             // sets direction to rotate depending on where the hub is
 
         this.forwardDistance = 30.0;    //  if using the arcTurn to move a TSE out of the way,
@@ -125,6 +126,7 @@ public class CRIAutoParams {
         this.midCarouselApproachAngle2 = 25; // last angle to turn to approach carousel
         this.midStorageParkTurn = 160;       // turn towards the storage for final approach
         this.carTurnHubAngle = 25;
+        this.midCarouselDistance=30;
         // use forward distance to position to score in the hub
     }   // end method redMiddle
 
@@ -180,6 +182,7 @@ public class CRIAutoParams {
         this.warehouseParkDistance = 30;   // distance to travel to get in warehouse parking location
         this.turnError = 2;             // error to use when turning
         this.hubFactor = -1;             // sets direction to rotate depending on where the hub is
+        this.midCarouselDistance=35;
 
     }   // end method blueWarehouse
 
@@ -211,6 +214,7 @@ public class CRIAutoParams {
         this.midTurnHubAngle = -35;         // angle to turn from start to approach the alliance hub
         this.midCarouselApproachAngle1 = -100; // angle after first crossing barrier to approach carousel
         this.midCarouselApproachAngle2 = -25; // last angle to turn to approach carousel
+        this.midCarouselDistance=38;
         this.midStorageParkTurn = -160;       // turn towards the storage for final approach
         this.carTurnHubAngle = -25;
 

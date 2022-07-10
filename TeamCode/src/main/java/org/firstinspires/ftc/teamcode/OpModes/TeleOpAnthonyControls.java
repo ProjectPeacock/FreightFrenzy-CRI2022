@@ -135,7 +135,7 @@ public class TeleOpAnthonyControls extends LinearOpMode {
 
             //if intake isn't deployed, deploy it & vice versa
 
-            if(gamepad1.right_bumper&&toggleIntake){
+            if(gamepad1.right_bumper&&toggleIntake&&mechControl.turretCentered()){
                 toggleIntake=false;
                 intakeDown=!intakeDown;
                 currentTime = runtime.time();
@@ -144,7 +144,7 @@ public class TeleOpAnthonyControls extends LinearOpMode {
             }
 
             //automatically retract intake
-            if(intakeDown&&robot.bucketSensor.getDistance(DistanceUnit.MM) < 120&&robot.motorArmAngle1.getCurrentPosition()>900){
+            if(intakeDown&&robot.bucketSensor.getDistance(DistanceUnit.MM) < 120&&robot.motorArmAngle1.getCurrentPosition()>(robot.ARM_1_INTAKE-50)){
                 intakeDown=false;
                 isDeployed=false;
                 bumpCount=0;
@@ -375,6 +375,7 @@ public class TeleOpAnthonyControls extends LinearOpMode {
             }
 
             telemetry.addData("TSE MODE: ",TSEMode);
+            telemetry.addData("Current Time",currentTime);
             telemetry.addData("","");
             telemetry.addData("Bucket Dump Servo Pos",robot.bucketDump.getPosition());
             telemetry.addData("Extra bump count line item = ", bumpCount);

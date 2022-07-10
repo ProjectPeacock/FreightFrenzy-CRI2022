@@ -34,7 +34,7 @@ public class AutoMechControlLibrary implements Runnable{
 
     public void moveToZero(){
         this.angle1=0;
-        this.angle2=localRobot.ARM_2_RESTING_INTAKE;
+        this.angle2=0;
     }
 //deploy intake method
     public void intakeOn(){
